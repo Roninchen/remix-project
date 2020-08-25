@@ -13,6 +13,7 @@ function SourceLocationTracker (_codeManager) {
   this.event = new EventManager()
   this.sourceMappingDecoder = new SourceMappingDecoder()
   this.sourceMapByAddress = {}
+  this.generatedSourcesByAddress = {}
 }
 
 /**
@@ -42,8 +43,20 @@ SourceLocationTracker.prototype.getSourceLocationFromVMTraceIndex = async functi
   return this.sourceMappingDecoder.atIndex(index, sourceMap)
 }
 
+/**
+ * Returns the generated sources from a specific @arg address
+ *
+ * @param {String} address - contract address from which has generated sources
+ * @param {Object} generatedSources - Object containing the sourceid, ast and the source code.
+ */
+SourceLocationTracker.prototype.getGeneratedSourcesFromAddress = function (address) {
+  if (this.generatedSourcesByAddress[address]) return this.generatedSourcesByAddress[address]
+  return null
+}
+
 SourceLocationTracker.prototype.clearCache = function () {
   this.sourceMapByAddress = {}
+  this.generatedSourcesByAddress = {}
 }
 
 function getSourceMap (address, code, contracts) {
@@ -57,7 +70,9 @@ function getSourceMap (address, code, contracts) {
 
       bytes = isCreation ? bytecode.object : deployedBytecode.object
       if (util.compareByteCode(code, '0x' + bytes)) {
-        return isCreation ? bytecode.sourceMap : deployedBytecode.sourceMap
+        const generatedSources = isCreation ? bytecode.generatedSources : deployedBytecode.generatedSources
+        const map = isCreation ? bytecode.sourceMap : deployedBytecode.sourceMap
+        return { generatedSources, map }
       }
     }
   }
