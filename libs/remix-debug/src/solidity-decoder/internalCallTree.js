@@ -221,15 +221,15 @@ function includeVariableDeclaration (tree, step, sourceLocation, scopeId, newLoc
       const stack = tree.traceManager.getStackAt(step)
       // the stack length at this point is where the value of the new local variable will be stored.
       // so, either this is the direct value, or the offset in memory. That depends on the type.
-      tree.solidityProxy.contractNameAt(step).then((contractName) => {
+      tree.solidityProxy.contractObjectAt(step).then((contract) => {
         if (variableDeclaration.attributes.name !== '') {
           var states = tree.solidityProxy.extractStatesDefinitions()
           var location = typesUtil.extractLocationFromAstVariable(variableDeclaration)
           location = location === 'default' ? 'storage' : location
-            // we push the new local variable in our tree
+          // we push the new local variable in our tree
           tree.scopes[scopeId].locals[variableDeclaration.attributes.name] = {
             name: variableDeclaration.attributes.name,
-            type: decodeInfo.parseType(variableDeclaration.attributes.type, states, contractName, location),
+            type: decodeInfo.parseType(variableDeclaration.attributes.type, states, contract.name, location),
             stackDepth: stack.length,
             sourceLocation: sourceLocation
           }
@@ -248,7 +248,7 @@ function includeVariableDeclaration (tree, step, sourceLocation, scopeId, newLoc
     // means: the previous location was a function definition && JUMPDEST
     // => we are at the beginning of the function and input/output are setup
 
-    tree.solidityProxy.contractNameAt(step).then((contractName) => { // cached
+    tree.solidityProxy.contractObjectAt(step).then((contract) => { // cached
       try {
         const stack = tree.traceManager.getStackAt(step)
         var states = tree.solidityProxy.extractStatesDefinitions()
@@ -266,10 +266,10 @@ function includeVariableDeclaration (tree, step, sourceLocation, scopeId, newLoc
           }
           // input params
           if (inputs) {
-            functionDefinitionAndInputs.inputs = addParams(inputs, tree, scopeId, states, contractName, previousSourceLocation, stack.length, inputs.children.length, -1)
+            functionDefinitionAndInputs.inputs = addParams(inputs, tree, scopeId, states, contract.name, previousSourceLocation, stack.length, inputs.children.length, -1)
           }
           // output params
-          if (outputs) addParams(outputs, tree, scopeId, states, contractName, previousSourceLocation, stack.length, 0, 1)
+          if (outputs) addParams(outputs, tree, scopeId, states, contract.name, previousSourceLocation, stack.length, 0, 1)
         }
       } catch (error) {
         console.log(error)
