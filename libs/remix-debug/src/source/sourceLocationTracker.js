@@ -26,7 +26,7 @@ function SourceLocationTracker (_codeManager) {
  */
 SourceLocationTracker.prototype.getSourceLocationFromInstructionIndex = async function (address, index, contracts) {
   const sourceMap = await extractSourceMap(this, this.codeManager, address, contracts)
-  return this.sourceMappingDecoder.atIndex(index, sourceMap)
+  return this.sourceMappingDecoder.atIndex(index, sourceMap.map)
 }
 
 /**
@@ -40,7 +40,7 @@ SourceLocationTracker.prototype.getSourceLocationFromInstructionIndex = async fu
 SourceLocationTracker.prototype.getSourceLocationFromVMTraceIndex = async function (address, vmtraceStepIndex, contracts) {
   const sourceMap = await extractSourceMap(this, this.codeManager, address, contracts)
   const index = this.codeManager.getInstructionIndex(address, vmtraceStepIndex)
-  return this.sourceMappingDecoder.atIndex(index, sourceMap)
+  return this.sourceMappingDecoder.atIndex(index, sourceMap.map)
 }
 
 /**

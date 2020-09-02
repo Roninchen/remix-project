@@ -96,9 +96,13 @@ class SolidityProxy {
     * @param {Object} sourceLocation  - source location containing the 'file' to retrieve the AST from
     * @return {Object} - AST of the current file
     */
-  ast (sourceLocation) {
+  ast (sourceLocation, generatedSources) {
     const file = this.fileNameFromIndex(sourceLocation.file)
-    if (this.sources[file]) {
+    if (!file && generatedSources && generatedSources.length) {
+      for (const source of generatedSources) {
+        if (source.id === sourceLocation.file) return source.ast
+      }
+    } else if (this.sources[file]) {
       return this.sources[file].legacyAST
     }
     return null
